@@ -1,7 +1,5 @@
 package lite.model;
 
-import framework.JsonValue;
-
 class Person extends Animal {
     private int age;
     private String name;
@@ -9,11 +7,11 @@ class Person extends Animal {
     private Person spouse;
 
     // objenesis
-    public Person(@JsonValue("age") int age,
-                  @JsonValue("name") String name,
-                  @JsonValue("dog") Dog dog,
-                  @JsonValue("species") String species,
-                  @JsonValue("spouse") Person spouse
+    public Person(int age,
+                  String name,
+                  Dog dog,
+                  String species,
+                  Person spouse
     ) {
         super(species);
         this.age = age;

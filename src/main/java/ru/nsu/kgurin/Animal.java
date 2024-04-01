@@ -1,15 +1,13 @@
 package ru.nsu.kgurin;
 
-import framework.ConstructorParam;
-
-public class Animal extends Being{
+public class Animal extends Being {
     private String species;
 
-    public Animal(Planet p){
+    public Animal(Planet p) {
         super(p);
     }
 
-    public Animal(@ConstructorParam Planet p, @ConstructorParam String s) {
+    public Animal(Planet p, String s) {
         super(p);
         species = s;
     }

@@ -1,14 +1,12 @@
 package ru.nsu.kgurin;
 
-import framework.JsonValue;
-
 import java.util.ArrayList;
 
 public class Person extends Animal {
     private String name;
     private Dog dog;
     private Person spouse;
-    public ArrayList<Integer> data;
+    public Person[] data;
     private static final String city = "Kyzyl";
     private transient String gender;
 
@@ -16,13 +14,13 @@ public class Person extends Animal {
         super(p, s);
     }
 
-    public Person(@JsonValue("planet") Planet planet,
-                  @JsonValue("species") String species,
-                  @JsonValue("name") String name,
-                  @JsonValue("dog") Dog dog,
-                  @JsonValue("spouse") Person spouse,
-                  @JsonValue("gender") String gender,
-                  @JsonValue("data") ArrayList<Integer> data) {
+    public Person(Planet planet,
+                  String species,
+                  String name,
+                  Dog dog,
+                  Person spouse,
+                  String gender,
+                  Person[] data) {
         super(planet, species);
         this.name = name;
         this.dog = dog;
@@ -47,7 +45,7 @@ public class Person extends Animal {
         this.gender = gender;
     }
 
-    public void setData(ArrayList<Integer> data) {
+    public void setData(Person[] data) {
         this.data = data;
     }
 }

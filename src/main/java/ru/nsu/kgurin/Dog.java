@@ -1,7 +1,5 @@
 package ru.nsu.kgurin;
 
-import framework.JsonValue;
-
 public class Dog extends Animal{
     String name;
 

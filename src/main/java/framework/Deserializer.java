@@ -1,47 +1,127 @@
 package framework;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
+import ru.nsu.kgurin.Person;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Deserializer {
-    public static Object buildObject(Class<?> clazz, Map<String, Object> map) throws Exception {
-        Constructor<?> constructor = getAnnotatedConstructor(clazz);
-        Object[] parameters = getParametersForConstructor(constructor, map);
-        constructor.setAccessible(true);
-        return constructor.newInstance(parameters);
+    private static final HashMap<Integer, Object> objectIdMap = new HashMap<>();
+
+    public static Object deserialize(Class<?> clazz, Map<String, Object> map) throws Exception {
+        createEmptyObjects(clazz, map);
+        return setFields(clazz, map);
     }
 
-    private static Constructor<?> getAnnotatedConstructor(Class<?> clazz) {
-        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            if (Stream.of(constructor.getParameterAnnotations())
-                    .allMatch(annotations -> Stream.of(annotations)
-                            .anyMatch(annotation -> annotation.annotationType() == JsonValue.class))) {
-                return constructor;
-            }
+    public static ArrayList<Object> deserializeList(Class<?> clazz, ArrayList<HashMap<String, Object>> maps) throws Exception {
+        ArrayList<Object> objects = new ArrayList<>();
+        for (var map : maps) {
+            createEmptyObjects(clazz, map);
+            objects.add(setFields(clazz, map));
         }
-        throw new IllegalArgumentException("No constructor annotated with @JsonValue found");
+        return objects;
     }
 
+    private static Object setFields(Class<?> clazz, Map<String, Object> map) throws Exception {
+        Object object = objectIdMap.get(map.get("__id__"));
 
-    private static Object[] getParametersForConstructor(Constructor<?> constructor, Map<String, Object> map) throws Exception {
-        Parameter[] parametersFromConstructor = constructor.getParameters();
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-        Object[] parameters = new Object[parametersFromConstructor.length];
-        for (int i = 0; i < parametersFromConstructor.length; i++) {
-            JsonValue jsonValueAnnotation = parametersFromConstructor[i].getAnnotation(JsonValue.class);
-            String key = jsonValueAnnotation.value();
-            if (map.containsKey(key)) {
-                Object value = map.get(key);
-                // проверка на parametersFromConstructor[i].getType().getSimpleName() == value.getClass().getSimpleName()
-                if (value instanceof Map) {
-                    parameters[i] = buildObject(parameterTypes[i], (Map<String, Object>) value);
-                } else {
-                    parameters[i] = map.get(key);
+        while (clazz != null) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (map.containsKey(field.getName())) {
+                    Object value = map.get(field.getName());
+                    if (value instanceof Map) {
+                        Object innerObject = setFields(field.getType(), (Map<String, Object>) map.get(field.getName()));
+                        field.set(object, innerObject);
+                    } else if (field.getType().isArray() || List.class.isAssignableFrom(field.getType())) {
+                        ArrayList<Object> arrayValues = new ArrayList<>();
+                        if (field.getType().isArray()) {
+                            List<?> list = (List<?>) value;
+                            for (Object element : list) {
+                                if (element instanceof Map) {
+                                    arrayValues.add(objectIdMap.get(((Map<?, ?>) element).get("__id__")));
+                                    setFields(field.getType().getComponentType(), (Map<String, Object>) element);
+                                } else {
+                                    arrayValues.add(objectIdMap.get(element));
+                                }
+                            }
+                            Class<?> componentType = field.getType().getComponentType();
+                            Object[] array = arrayValues.toArray((Object[]) Array.newInstance(componentType, arrayValues.size()));
+                            field.set(object, array);
+                        } else if (List.class.isAssignableFrom(field.getType())) {
+                            List<?> list = (List<?>) value;
+                            Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+                            for (Object element : list) {
+                                if (element instanceof Map) {
+                                    arrayValues.add(objectIdMap.get(((Map<?, ?>) element).get("__id__")));
+                                    setFields((Class<?>) typeArguments[0], (Map<String, Object>) element);
+                                } else {
+                                    arrayValues.add(objectIdMap.get(element));
+                                }
+                            }
+                            field.set(object, arrayValues);
+                        }
+                    } else if (value.getClass().getSimpleName().equals("Integer")
+                            && !field.getType().getSimpleName().equals("int")
+                            && !field.getType().getSimpleName().equals(value.getClass().getSimpleName())) {
+                        Object innerObject = objectIdMap.get(value);
+                        field.set(object, innerObject);
+                    } else {
+                        field.set(object, map.get(field.getName()));
+                    }
                 }
             }
+            clazz = clazz.getSuperclass();
         }
-        return parameters;
+        return object;
+    }
+
+    private static void createEmptyObjects(Class<?> clazz, Map<String, Object> map) {
+        if (!objectIdMap.containsKey((Integer) map.get("__id__"))) {
+            Objenesis objenesis = new ObjenesisStd();
+            Object object = objenesis.newInstance(clazz);
+            objectIdMap.put((Integer) map.get("__id__"), object);
+
+
+            while (clazz != null) {
+                Field[] fields = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    if (map.containsKey(field.getName())) {
+                        Object value = map.get(field.getName());
+                        if (value instanceof Map) {
+                            createEmptyObjects(field.getType(), (Map<String, Object>) map.get(field.getName()));
+                        } else if (field.getType().isArray() || List.class.isAssignableFrom(field.getType())) {
+                            if (field.getType().isArray()) {
+                                List<?> list = (List<?>) value;
+                                for (Object element : list) {
+                                    if (element instanceof Map) {
+                                        createEmptyObjects(field.getType().getComponentType(), (Map<String, Object>) element);
+                                    }
+                                }
+                            } else if (List.class.isAssignableFrom(field.getType())) {
+                                List<?> list = (List<?>) value;
+                                Type[] typeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+                                for (Object element : list) {
+                                    if (element instanceof Map) {
+                                        createEmptyObjects((Class<?>) typeArguments[0], (Map<String, Object>) element);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                clazz = clazz.getSuperclass();
+            }
+        }
     }
 }
