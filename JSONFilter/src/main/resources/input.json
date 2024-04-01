@@ -1,6 +1,5 @@
 [
   {
-    "person1": {
       "name": "John",
       "gender": "male",
       "age": 20,
@@ -11,12 +10,8 @@
         "dog": {
           "name": "Bobby"
         }
-      },
-      "dog": {
-        "name": "Bobby"
       }
-    }
-  },
+    },
   {
     "name": "Ivan",
     "gender": "male",

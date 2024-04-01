@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "gender": "male",
+    "name": "John",
+    "age": 20,
+    "spouse": {
+      "gender": "female",
+      "name": "Matilda",
+      "dog": {
+        "name": "Bobby"
+      },
+      "age": 22
+    }
+  },
+  {
+    "gender": "male",
+    "name": "Ivan",
+    "dog": {
+      "name": "Bobik"
+    },
+    "age": 45,
+    "spouse": {
+      "gender": "female",
+      "name": "Olga",
+      "dog": {
+        "name": "Bobik"
+      },
+      "age": 30
+    }
+  }
+]

@@ -10,10 +10,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class JsonFilter {
-    public int someField = 0;
     public static void main(String[] args) {
         try {
             File inputFile = new File("src/main/resources/input.json");
@@ -24,15 +22,14 @@ public class JsonFilter {
             //проверить на ленивые вычисления
             JSONArray jsonArray = new JSONArray(token);
 
-            // Создаем пустую HashMap для хранения отфильтрованных данных
+
             ArrayList<JSONObject> filteredData = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 Object jsonObject = jsonArray.get(i);
 
                 //переписать в enum, перегрузка функции
-                //про selectorы reflection
                 //можно генерировать строку селектором
-                if(isCorrectJsonObject((JSONObject) jsonObject, "age", "in", "person1")) {
+                if(isCorrectJsonObject((JSONObject) jsonObject, "age", Operator.IN,"age")) {
                     filteredData.add((JSONObject) jsonObject);
                 }
             }
@@ -73,22 +70,39 @@ public class JsonFilter {
     //обращение по уровням
     //exceptions в самом конце
     //два метода с одинаковым названием, но разными типами аргументов
+
+
+    private static Boolean isCorrectJsonObject(JSONObject jsonObject, String field, Operator operator, Object fieldValue) throws JSONException {
+        String[] keys = JSONObject.getNames(jsonObject);
+        if (keys != null) {
+            for (String key : keys) {
+                Object value = jsonObject.get(key);
+                if (operator.equals(Operator.IN)) {
+                    return jsonObject.has((String) fieldValue);
+                } else if (value instanceof JSONObject innerObject) {
+                    isCorrectJsonObject(innerObject, field, operator, fieldValue);
+                } else if (key.equals(field) && compareValues(value, operator, fieldValue)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static Boolean isCorrectJsonObject(JSONObject jsonObject, String field, String operator, Object fieldValue) throws JSONException {
         String[] keys = JSONObject.getNames(jsonObject);
         if (keys != null) {
             for (String key : keys) {
                 Object value = jsonObject.get(key);
-                if (value instanceof JSONObject innerObject) {
-                    // Рекурсивно фильтруем вложенные объекты и добавляем результаты в отфильтрованный объект
+                if (operator.equals("in")) {
+                    return jsonObject.has(field);
+                } else if (value instanceof JSONObject innerObject) {
                     isCorrectJsonObject(innerObject, field, operator, fieldValue);
-                } else if (operator.equals("in")) {
-                    return jsonObject.has((String) fieldValue);
-                    // Если ключ соответствует заданному полю, сравниваем его значение
                 } else if (key.equals(field) && compareValues(value, operator, fieldValue)) {
-                        return true;
-                    }
+                    return true;
                 }
             }
+        }
         return false;
     }
 
@@ -100,7 +114,20 @@ public class JsonFilter {
             case "<" -> (Integer) compareValue < (Integer) factValue;
             case ">=" -> (Integer) compareValue >= (Integer) factValue;
             case "<=" -> (Integer) compareValue <= (Integer) factValue;
-            default -> false; // Invalid operator
+            default -> false;
+        };
+    }
+
+    // Метод для сравнения значений в соответствии с оператором
+    private static boolean compareValues(Object compareValue, Operator operator, Object factValue) {
+        return switch (operator) {
+            case EQUALS -> compareValue.equals(factValue);
+            case NOT_EQUALS -> !compareValue.equals(factValue);
+            case GREATER_THAN -> (Integer) compareValue > (Integer) factValue;
+            case LESS_THAN -> (Integer) compareValue < (Integer) factValue;
+            case GREATER_THAN_OR_EQUALS -> (Integer) compareValue >= (Integer) factValue;
+            case LESS_THAN_OR_EQUALS -> (Integer) compareValue <= (Integer) factValue;
+            default -> false;
         };
     }
 }
