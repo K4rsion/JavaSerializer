@@ -1,0 +1,36 @@
+[
+  {
+    "person1": {
+      "name": "John",
+      "gender": "male",
+      "age": 20,
+      "spouse": {
+        "name": "Matilda",
+        "age": 22,
+        "gender": "female",
+        "dog": {
+          "name": "Bobby"
+        }
+      },
+      "dog": {
+        "name": "Bobby"
+      }
+    }
+  },
+  {
+    "name": "Ivan",
+    "gender": "male",
+    "age": 45,
+    "spouse": {
+      "name": "Olga",
+      "age": 30,
+      "gender": "female",
+      "dog": {
+        "name": "Bobik"
+      }
+    },
+    "dog": {
+      "name": "Bobik"
+    }
+  }
+]
