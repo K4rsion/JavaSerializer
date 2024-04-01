@@ -7,42 +7,37 @@ import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class JsonFilter {
-    public static void main(String[] args) {
+    public static ArrayList<JSONObject> filter(File inputFile, String field, Operator operator, String fieldValue) {
+        // Создаем пустую HashMap для хранения отфильтрованных данных
+        ArrayList<JSONObject> filteredData = new ArrayList<>();
         try {
-            File inputFile = new File("src/main/resources/input.json");
-            File outputFile = new File("src/main/resources/output.json");
-
             FileReader reader = new FileReader(inputFile);
             JSONTokener token = new JSONTokener(reader);
             //проверить на ленивые вычисления
             JSONArray jsonArray = new JSONArray(token);
 
-
-            ArrayList<JSONObject> filteredData = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 Object jsonObject = jsonArray.get(i);
 
                 //переписать в enum, перегрузка функции
+                //про selectorы reflection
                 //можно генерировать строку селектором
-                if(isCorrectJsonObject((JSONObject) jsonObject, "age", Operator.IN,"age")) {
+                if (isCorrectJsonObject((JSONObject) jsonObject, field, operator, fieldValue)) {
                     filteredData.add((JSONObject) jsonObject);
                 }
             }
 
-            // Записываем строку JSON в файл output.json
-            FileWriter writer = new FileWriter(outputFile);
-            writer.write(filteredData.toString());
-            writer.close();
-
             reader.close();
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Error while reading JSON file");
+        } catch (JSONException e) {
+            System.err.println("Error trying to get JSON element");
         }
+        return filteredData;
     }
 
     enum Operator {
