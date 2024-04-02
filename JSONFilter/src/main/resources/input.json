@@ -1,31 +1,65 @@
 [
   {
-      "name": "John",
-      "gender": "male",
-      "age": 20,
-      "spouse": {
-        "name": "Matilda",
-        "age": 22,
-        "gender": "female",
-        "dog": {
-          "name": "Bobby"
-        }
-      }
-    },
-  {
-    "name": "Ivan",
-    "gender": "male",
-    "age": 45,
-    "spouse": {
-      "name": "Olga",
-      "age": 30,
-      "gender": "female",
-      "dog": {
-        "name": "Bobik"
-      }
-    },
+    "__id__": 1554547125,
+    "system": "Solar System",
+    "data": [],
+    "species": "Human",
+    "planet": 1706377736,
+    "name": "person1",
     "dog": {
-      "name": "Bobik"
+      "owner": {
+        "name": "Jimmy"
+      },
+      "__id__": 140435067,
+      "system": "Solar System",
+      "species": "Dog",
+      "planet": {
+        "__id__": 1706377736,
+        "planet": "Earth"
+      },
+      "name": "Thea"
+    }
+  },
+  {
+    "__id__": 1927950199,
+    "system": "Solar System",
+    "data": [],
+    "species": "Human",
+    "planet": 1706377736,
+    "name": "person2",
+    "dog": {
+      "owner": {
+        "name": "John"
+      },
+      "__id__": 140435067,
+      "system": "Solar System",
+      "species": "Dog",
+      "planet": {
+        "__id__": 1706377736,
+        "planet": "Earth"
+      },
+      "name": "Thea"
+    }
+  },
+  {
+    "__id__": 868693306,
+    "system": "Solar System",
+    "data": [],
+    "species": "Human",
+    "planet": 1706377736,
+    "name": "person3",
+    "dog": {
+      "owner": {
+        "name": "Joe"
+      },
+      "__id__": 140435067,
+      "system": "Solar System",
+      "species": "Dog",
+      "planet": {
+        "__id__": 1706377736,
+        "planet": "Earth"
+      },
+      "name": "Thea"
     }
   }
 ]
