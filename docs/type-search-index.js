@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"framework","l":"Deserializer"},{"p":"framework","l":"JsonFilter"},{"p":"framework","l":"JsonReader"},{"p":"framework","l":"JsonWriter"},{"p":"framework","l":"Operator"},{"p":"framework","l":"Serializer"}];updateSearchResults();
