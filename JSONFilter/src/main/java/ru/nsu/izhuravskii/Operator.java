@@ -1,5 +1,8 @@
 package ru.nsu.izhuravskii;
 
+/**
+ * This is enum for operator of JSON filter
+ */
 public enum Operator {
     EQUALS("="),
     NOT_EQUALS("!="),
